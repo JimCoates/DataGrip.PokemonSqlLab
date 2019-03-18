@@ -1,0 +1,81 @@
+# What are all the types of pokemon that a pokemon can have?
+SELECT name
+FROM pokemon.types;
+
+# What is the name of the pokemon with id 45?
+SELECT name
+FROM pokemon.pokemons
+WHERE id = 45;
+
+# How many pokemon are there?
+SELECT COUNT(*) AS "count"
+FROM pokemon.pokemons;
+
+# How many types are there?
+SELECT COUNT(DISTINCT primary_type) AS "count"
+FROM pokemon.pokemons;
+
+# How many pokemon have a secondary type?
+SELECT COUNT(secondary_type) AS "count"
+FROM pokemon.pokemons;
+
+# What is each pokemon's primary type?
+SELECT n.name, t.name
+FROM pokemon.pokemons n
+       JOIN pokemon.types t
+            ON n.primary_type = t.id;
+
+# What is Rufflet's secondary type?
+SELECT p.name, t.name AS 'Secondary Type'
+FROM pokemon.pokemons p
+       JOIN pokemon.types t
+            ON p.secondary_type = t.id
+WHERE p.name = 'Rufflet';
+
+# What are the names of the pokemon that belong to the trainer with trainerID 303?
+SELECT t.trainerID, pe.name
+FROM pokemon.trainers t
+       JOIN pokemon.pokemon_trainer p
+            ON t.trainerID = p.trainerID
+       JOIN pokemon.pokemons pe
+            ON pe.id = p.pokemon_id
+WHERE t.trainerID = 303;
+
+# How many pokemon have a secondary type Poison
+SELECT COUNT(t.name) AS 'Number of Pokemon with a Secondary Type'
+FROM pokemon.types t
+       JOIN pokemon.pokemons p
+            ON t.id = p.secondary_type;
+
+# What are all the primary types and how many pokemon have that type?
+SELECT t.name AS 'Primary Type', COUNT(p.primary_type) AS 'Number of Pokemon with Type'
+FROM pokemon.types t
+       JOIN pokemon.pokemons p
+            ON t.id = p.primary_type
+GROUP BY t.name;
+# How many pokemon at level 100 does each trainer with at least one level 100 pokemon have? (Hint: your query should not display a trainer
+SELECT pt.trainerID, COUNT(*) AS 'Number of Pokemon'
+FROM pokemon.pokemon_trainer pt
+WHERE pt.pokelevel >= 100
+GROUP BY pt.trainerID;
+
+# How many pokemon only belong to one trainer and no other?
+SELECT COUNT(*) AS 'Count of Single Trainer'
+FROM (SELECT COUNT(pokemon.pokemon_trainer.pokemon_id)
+      FROM pokemon.pokemon_trainer
+      GROUP BY pokemon_id
+      HAVING COUNT(*) = 1) subquery;
+
+#Create query and order
+SELECT p.name        'Pokemon Name',
+       t.trainername 'Trainer Name',
+       pt.pokelevel  'Pokemon Level',
+       tp.name       'Pokemon Type',
+       tps.name      'Pokemon Secondary Type'
+FROM pokemon.trainers AS t
+       JOIN pokemon.pokemon_trainer AS pt ON t.trainerID = pt.trainerID
+       JOIN pokemon.pokemons AS p ON p.id = pt.pokemon_id
+       JOIN pokemon.types AS tp ON p.primary_type = tp.id
+       LEFT OUTER JOIN pokemon.types AS tps ON p.secondary_type = tps.id
+ORDER BY 3 DESC,4;
+
